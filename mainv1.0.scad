@@ -1,7 +1,7 @@
 /**
  * Star Generator
  *
- * Sourcecode: https://github.com/veryos-git/openscad_star_translucent_randomline_cutout
+ * Sourcecode: git@github.com:veryos-git/openscad_size_reference_objects.git
  * Author: veryos  
  * Version: 1.0
  *
