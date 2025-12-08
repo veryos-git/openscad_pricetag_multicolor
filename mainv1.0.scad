@@ -24,8 +24,14 @@
  * [v1.0] Initial release
  */
 
-include <BOSL/constants.scad>
+
+//wont work in makerworld
+//include <BOSL/constants.scad>
+//use <BOSL/shapes.scad>
+
+//using BOSL2 for makerworld compatibility
 use <BOSL/shapes.scad>
+
 
 scl_x = 1;
 scl_y = 1; 
