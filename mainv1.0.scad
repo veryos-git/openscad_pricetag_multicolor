@@ -6,7 +6,7 @@
  * Version: 1.0
  *
  * Description:
- * This OpenSCAD script generates a 3d object that is a size reference.
+ * This OpenSCAD script generates a price tag for a bakery or cafe. The text can be customized.
  *
  * License:
  *    Licensed under the GNU General Public License v3.0 or later.
@@ -19,6 +19,7 @@
  * - free source code hosting: https://github.com/
  * - online photo collage: https://pixlr.com/photo-collage/
  * - thumbnail designer: https://tools.datmt.com/tools/thumb-maker
+ * - BOSL2 library: https://github.com/BelfrySCAD/BOSL2/wiki/shapes3d.scad#module-cuboid
  * 
  * Changelog:
  * [v1.0] Initial release
@@ -32,122 +33,178 @@
 //using BOSL2 for makerworld compatibility
 include <BOSL2/std.scad>;
 
-
-scl_x = 1;
-scl_y = 1; 
-scl_z = 1;
-padding = 1;
-chamfer = 0.4;
+// text_1 = "Schifffahrtsgesellschaft";
 
 
-function sizesfrominput(scl_x, scl_y, scl_z, padding) =
-    let(
-        scl_x_b = max(scl_x + padding * 2, 10),
-        scl_y_b = max(scl_y + padding * 2, 16),
-        scl_z_b = 1.2,
-        scl_z_text = 1.2,
-        scl_y_text = 4
-    )
-    [
-        ["scl_x_b", scl_x_b],
-        ["scl_y_b", scl_y_b],
-        ["scl_z_b", scl_z_b],
-        ["scl_z_text", scl_z_text],
-        ["scl_y_text", scl_y_text]
-    ];
-// Helper function to get values
-function get(dict, key) = dict[search([key], dict)[0]][1];
+/* [text line 1] */
+text_1 = "Cherry"; // todo , see if emoji icon can be used 🍰
+text_1_size = 8;
+text_1_alignment_horizontal = "left"; // [left, center, right]
 
-module reference_cube_plate(
-    scl_x,
-    scl_y,
-    scl_z,
-    scl_x_b,
-    scl_y_b,
-    scl_z_b,
-    scl_z_text,
-    scl_y_text,
-    chamfer = 0.2,
-    font = "Liberation Sans"
-){
 
-    echo(scl_y_text)
+/* [text line 2] */
+text_2 = "Cake";
+text_2_size = 8;
+text_2_alignment_horizontal = "left"; // [left, center, right]
+
+
+/* [text line 3] */
+text_3 = "5$";
+text_3_size = 8;
+text_3_alignment_horizontal = "right"; // [left, center, right]
+
+/* [text] */
+font_type = "Overpass"; //     [Overpass,Aladin, Aldo, Akronim, Audiowide, Bangers, Bebas Neue, Bubblegum Sans, Changa One, Dancing Script, Damion, DynaPuff, Gochi Hand, Great Vibes, Griffy, Indie Flower, Lobster, Luckiest Guy, Mitr, Nanum Pen, New Rocker, Orbitron, Pacifico, Passion One, Permanent Marker, Pixelify Sans, PoetsenOne, Rubik Moonrocks, Rubik Wet Paint, Saira Stencil One, Sacramento, Shrikhand, Spicy Rice, Titan One, Trade Winds]
+
+// may not work for every font style
+font_style = "Regular"; //  [Regular ,Bold , Italic , Bold Italic]
+font_name_full = str(font_type, ":style=", font_style);
+
+/* [plate] */
+width = 50; 
+height = 30;
+// angle of the stand
+angle = 50; 
+thickness = 3;
+thickness_stand = 1.2;
+// should be a multiple of layerheight (3*0.2=0.6)
+text_backlayer_thickness = 0.6;
+
+// the height is the hypotenuse base of the triangle
+// the heigh2 should be the kathete height of the triangle
+height2 = height*cos(angle)+5;
+
+stolzfight = 1.* 0.01;
+
+
+text_1_anchor = 
+    text_1_alignment_horizontal == "left" ? LEFT :
+    text_1_alignment_horizontal == "center" ? CENTER :
+    text_1_alignment_horizontal == "right" ? RIGHT :
+    CENTER;
+
+text_2_anchor = 
+    text_2_alignment_horizontal == "left" ? LEFT :
+    text_2_alignment_horizontal == "center" ? CENTER :
+    text_2_alignment_horizontal == "right" ? RIGHT :
+    CENTER;
+text_3_anchor = 
+    text_3_alignment_horizontal == "left" ? LEFT :
+    text_3_alignment_horizontal == "center" ? CENTER :
+    text_3_alignment_horizontal == "right" ? RIGHT :
+    CENTER;
+
+text_padding_left = 3;
+text_padding_right = 3;
+text_padding_top = 2;
+text_padding_bottom = 2;
+
+text_1_x_translation = 
+    text_1_alignment_horizontal == "left" ? -width/2 + text_padding_left :
+    text_1_alignment_horizontal == "center" ? 0 :
+    text_1_alignment_horizontal == "right" ? width/2 - text_padding_right :
+    0;
+text_2_x_translation = 
+    text_2_alignment_horizontal == "left" ? -width/2 + text_padding_left :
+    text_2_alignment_horizontal == "center" ? 0 :
+    text_2_alignment_horizontal == "right" ? width/2 - text_padding_right :
+    0;
+text_3_x_translation = 
+    text_3_alignment_horizontal == "left" ? -width/2 + text_padding_left :
+    text_3_alignment_horizontal == "center" ? 0 :
+    text_3_alignment_horizontal == "right" ? width/2 - text_padding_right :
+    0;
+
+
+
+
+
+module textplate(){
+
     difference(){
-        union(){
-            translate([0,0,scl_z/2])
-            //cube1 without chamfer
-            cuboid([scl_x,scl_y,scl_z], chamfer=chamfer, trimcorners=false);
 
-            //bottom plate
-            translate([0,0, -scl_z_b/2])
-            cuboid([scl_x_b,scl_y_b,scl_z_b], chamfer=0.2, trimcorners=false);
-        }
+        cuboid([width, height, thickness], rounding=thickness/4);
 
         let(
-            lineheight = 1.2,
-            marginy = scl_y_text*lineheight
+            hpadding = height - text_padding_top - text_padding_bottom,
+            trn_y = hpadding/3
         ){
+            translate([0, height/2-text_padding_top, 0])
 
-            translate([0,marginy,-scl_z_b-0.4])
-            mirror([1,0,0])
-            linear_extrude(height=scl_z_text){
-                text(text = str("x",scl_x), font = font, size = scl_y_text, halign = "center", valign="center");
+            union(){
+                
+                    
+                translate([text_1_x_translation, -0*trn_y-(trn_y/2), text_backlayer_thickness])
+                text3d(text_1, h=thickness, size=text_1_size, font = font_name_full, anchor=text_1_anchor, atype="ycenter");
+                
+                translate([text_2_x_translation, -1*trn_y-(trn_y/2), text_backlayer_thickness])
+                text3d(text_2, h=thickness, size=text_2_size, font = font_name_full, anchor=text_2_anchor, atype="ycenter");
+                
+                translate([text_3_x_translation, -2*trn_y-(trn_y/2), text_backlayer_thickness])
+                text3d(text_3, h=thickness, size=text_3_size, font = font_name_full, anchor=text_3_anchor, atype="ycenter");
             }
-            translate([0,0,-scl_z_b-0.4])
-            mirror([1,0,0])
-            linear_extrude(height=scl_z_text){
-                text(text = str("y",scl_y), font = font, size = scl_y_text, halign = "center", valign="center");
-            }
-            translate([0,-marginy,-scl_z_b-0.4])
-            mirror([1,0,0])
-            linear_extrude(height=scl_z_text){
-                text(text = str("z",scl_z), font = font, size = scl_y_text, halign = "center", valign="center");
-            }
+            
         }
+
+        // translate([text_2_x_translation, -height/4, text_backlayer_thickness])
+        // text3d(text_2, h=thickness, size=text_2_size, font = font, anchor=text_2_anchor, atype="ycenter");
+        // translate([text_3_x_translation, -height/4, text_backlayer_thickness])
+        // text3d(text_3, h=thickness, size=text_3_size, font = font, anchor=text_3_anchor, atype="ycenter");
+    }
+}
+
+module textplate_with_stand(){
+
+    difference(){
+
+        difference(){
+
+            union(){
+  
+                difference(){
+
+                translate([0,0,-thickness_stand])
+                    rotate([angle, 0, 0])
+                    difference(){
+                        translate([0, height/2,-thickness_stand/2])
+                        textplate();
+                        
+                    }
+                    translate([0,0,-thickness])
+                    cuboid([width*2, height*2, 4]);
+                }
+                translate([0, height2/2-thickness_stand/2, -thickness_stand/2])
+                cuboid([width, height2, thickness_stand], rounding=thickness_stand/4);
+            
+            }
+
+
+        }
+        rotate([angle, 0, 0])
+        translate([0,0,thickness/2])
+        cuboid([width*2, height*2, thickness]);
+
+
     }
 
-
-}
-module reference_cubes_with_plate(
-    scl_x,
-    scl_y,
-    scl_z,
-    padding = 1, 
-    chamfer = 0.4
-){
-    // cuboid([scl_x,scl_y,scl_z], chamfer=chamfer, trimcorners=false);
-    // Usage
-    sizes = sizesfrominput(scl_x, scl_y, scl_z, padding);
-    scl_x_b = get(sizes, "scl_x_b");
-    scl_y_b = get(sizes, "scl_y_b");
-    scl_z_b = get(sizes, "scl_z_b");
-    scl_z_text = get(sizes, "scl_z_text");
-    scl_y_text = get(sizes, "scl_y_text");
-    
-    reference_cube_plate(
-        scl_x = scl_x,
-        scl_y = scl_y,
-        scl_z = scl_z,
-        scl_x_b = scl_x_b,
-        scl_y_b = scl_y_b,
-        scl_z_b = scl_z_b,
-        scl_z_text = scl_z_text,
-        scl_y_text = scl_y_text,
-        chamfer = 0.0
-    );
-    translate([scl_x_b,0,0])
-    reference_cube_plate(
-        scl_x = scl_x,
-        scl_y = scl_y,
-        scl_z = scl_z,
-        scl_x_b = scl_x_b,
-        scl_y_b = scl_y_b,
-        scl_z_b = scl_z_b,
-        scl_z_text = scl_z_text,
-        scl_y_text = scl_y_text,
-        chamfer = chamfer
-    );
 }
 
 
-reference_cubes_with_plate(scl_x, scl_y, scl_z, padding, chamfer);
+
+textplate_with_stand();
+
+translate([width+10, 0, -thickness_stand])
+union(){
+    rotate([90+(90-angle),0,0])
+    textplate_with_stand();
+    // translate([-30,-70,0])
+    // cube([60,10,1]);
+    // translate([-20,0,0])
+    // color([1,0,0])
+    // text3d("print like this ^", h = 2, size = 5, anchor = LEFT, atype="ycenter");
+}
+
+
+
+// color([1,0,0])
+// sphere(r=10);
