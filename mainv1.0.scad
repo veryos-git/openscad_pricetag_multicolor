@@ -1,7 +1,7 @@
 /**
  * Star Generator
  *
- * Sourcecode: git@github.com:veryos-git/openscad_size_reference_objects.git
+ * Sourcecode: https://github.com/veryos-git/openscad_pricetag_multicolor
  * Author: veryos  
  * Version: 1.0
  *
