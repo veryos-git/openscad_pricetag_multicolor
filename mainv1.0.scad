@@ -68,13 +68,13 @@ angle = 50;
 thickness = 3;
 thickness_stand = 1.2;
 // should be a multiple of layerheight (3*0.2=0.6)
-text_backlayer_thickness = 0.6;
+text_backlayer_thickness = 2.4;
 
 // the height is the hypotenuse base of the triangle
 // the heigh2 should be the kathete height of the triangle
 height2 = height*cos(angle)+5;
 
-stolzfight = 1.* 0.01;
+stolzfight = 1.0* 0.01;
 
 
 text_1_anchor = 
@@ -115,41 +115,60 @@ text_3_x_translation =
     text_3_alignment_horizontal == "right" ? width/2 - text_padding_right :
     0;
 
+// Width of the border around the text (in mm)
+text_border_width = 0.4;
 
 
+module text_lines(offset_amount = 0){
+    let(
+        hpadding = height - text_padding_top - text_padding_bottom,
+        trn_y = hpadding/3
+    ){
+        translate([0, height/2-text_padding_top, 0])
 
+        union(){
+            
+            translate([text_1_x_translation, -0*trn_y-(trn_y/2), text_backlayer_thickness])
+            if (offset_amount > 0) {
+                offset3d(offset_amount)
+                text3d(text_1, h=thickness, size=text_1_size, font = font_name_full, anchor=text_1_anchor, atype="ycenter");
+            } else {
+                text3d(text_1, h=thickness, size=text_1_size, font = font_name_full, anchor=text_1_anchor, atype="ycenter");
+            }
+            
+            translate([text_2_x_translation, -1*trn_y-(trn_y/2), text_backlayer_thickness])
+            if (offset_amount > 0) {
+                offset3d(offset_amount)
+                text3d(text_2, h=thickness, size=text_2_size, font = font_name_full, anchor=text_2_anchor, atype="ycenter");
+            } else {
+                text3d(text_2, h=thickness, size=text_2_size, font = font_name_full, anchor=text_2_anchor, atype="ycenter");
+            }
+            
+            translate([text_3_x_translation, -2*trn_y-(trn_y/2), text_backlayer_thickness])
+            if (offset_amount > 0) {
+                offset3d(offset_amount)
+                text3d(text_3, h=thickness, size=text_3_size, font = font_name_full, anchor=text_3_anchor, atype="ycenter");
+            } else {
+                text3d(text_3, h=thickness, size=text_3_size, font = font_name_full, anchor=text_3_anchor, atype="ycenter");
+            }
+        }
+    }
+}
 
 module textplate(){
 
-    difference(){
+    union(){
+        
+        difference(){
 
-        cuboid([width, height, thickness], rounding=thickness/4);
+            cuboid([width, height, thickness], rounding=thickness/4);
 
-        let(
-            hpadding = height - text_padding_top - text_padding_bottom,
-            trn_y = hpadding/3
-        ){
-            translate([0, height/2-text_padding_top, 0])
-
-            union(){
-                
-                    
-                translate([text_1_x_translation, -0*trn_y-(trn_y/2), text_backlayer_thickness])
-                text3d(text_1, h=thickness, size=text_1_size, font = font_name_full, anchor=text_1_anchor, atype="ycenter");
-                
-                translate([text_2_x_translation, -1*trn_y-(trn_y/2), text_backlayer_thickness])
-                text3d(text_2, h=thickness, size=text_2_size, font = font_name_full, anchor=text_2_anchor, atype="ycenter");
-                
-                translate([text_3_x_translation, -2*trn_y-(trn_y/2), text_backlayer_thickness])
-                text3d(text_3, h=thickness, size=text_3_size, font = font_name_full, anchor=text_3_anchor, atype="ycenter");
-            }
-            
+            // Cut out text with offset to create border
+            text_lines(text_border_width);
         }
-
-        // translate([text_2_x_translation, -height/4, text_backlayer_thickness])
-        // text3d(text_2, h=thickness, size=text_2_size, font = font, anchor=text_2_anchor, atype="ycenter");
-        // translate([text_3_x_translation, -height/4, text_backlayer_thickness])
-        // text3d(text_3, h=thickness, size=text_3_size, font = font, anchor=text_3_anchor, atype="ycenter");
+        
+        // Add back the text without offset (creating the border effect)
+        text_lines(0);
     }
 }
 
