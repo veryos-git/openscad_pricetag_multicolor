@@ -1,5 +1,4 @@
 /**
- * Star Generator
  *
  * Sourcecode: https://github.com/veryos-git/openscad_pricetag_multicolor
  * Author: veryos  
@@ -68,7 +67,7 @@ angle = 50;
 thickness = 3;
 thickness_stand = 1.2;
 // should be a multiple of layerheight (3*0.2=0.6)
-text_backlayer_thickness = 2.4;
+text_extrusion = 0.6;
 
 // the height is the hypotenuse base of the triangle
 // the heigh2 should be the kathete height of the triangle
@@ -119,7 +118,7 @@ text_3_x_translation =
 text_border_width = 0.4;
 
 
-module text_lines(offset_amount = 0){
+module text_lines(offset_amount = 0, thickness_text = thickness){
     let(
         hpadding = height - text_padding_top - text_padding_bottom,
         trn_y = hpadding/3
@@ -128,28 +127,28 @@ module text_lines(offset_amount = 0){
 
         union(){
             
-            translate([text_1_x_translation, -0*trn_y-(trn_y/2), text_backlayer_thickness])
+            translate([text_1_x_translation, -0*trn_y-(trn_y/2), 0])
             if (offset_amount > 0) {
                 offset3d(offset_amount)
-                text3d(text_1, h=thickness, size=text_1_size, font = font_name_full, anchor=text_1_anchor, atype="ycenter");
+                text3d(text_1, h=thickness_text, size=text_1_size, font = font_name_full, anchor=text_1_anchor, atype="ycenter");
             } else {
-                text3d(text_1, h=thickness, size=text_1_size, font = font_name_full, anchor=text_1_anchor, atype="ycenter");
+                text3d(text_1, h=thickness_text, size=text_1_size, font = font_name_full, anchor=text_1_anchor, atype="ycenter");
             }
             
-            translate([text_2_x_translation, -1*trn_y-(trn_y/2), text_backlayer_thickness])
+            translate([text_2_x_translation, -1*trn_y-(trn_y/2), 0])
             if (offset_amount > 0) {
                 offset3d(offset_amount)
-                text3d(text_2, h=thickness, size=text_2_size, font = font_name_full, anchor=text_2_anchor, atype="ycenter");
+                text3d(text_2, h=thickness_text, size=text_2_size, font = font_name_full, anchor=text_2_anchor, atype="ycenter");
             } else {
-                text3d(text_2, h=thickness, size=text_2_size, font = font_name_full, anchor=text_2_anchor, atype="ycenter");
+                text3d(text_2, h=thickness_text, size=text_2_size, font = font_name_full, anchor=text_2_anchor, atype="ycenter");
             }
             
-            translate([text_3_x_translation, -2*trn_y-(trn_y/2), text_backlayer_thickness])
+            translate([text_3_x_translation, -2*trn_y-(trn_y/2), 0])
             if (offset_amount > 0) {
                 offset3d(offset_amount)
-                text3d(text_3, h=thickness, size=text_3_size, font = font_name_full, anchor=text_3_anchor, atype="ycenter");
+                text3d(text_3, h=thickness_text, size=text_3_size, font = font_name_full, anchor=text_3_anchor, atype="ycenter");
             } else {
-                text3d(text_3, h=thickness, size=text_3_size, font = font_name_full, anchor=text_3_anchor, atype="ycenter");
+                text3d(text_3, h=thickness_text, size=text_3_size, font = font_name_full, anchor=text_3_anchor, atype="ycenter");
             }
         }
     }
@@ -157,22 +156,23 @@ module text_lines(offset_amount = 0){
 
 module textplate(){
 
-    union(){
+    // union(){
         
         difference(){
-
+            color([0,0,0])
             cuboid([width, height, thickness], rounding=thickness/4);
-
+            color([0,0,0])
+            translate([0,0,-text_extrusion]);
             // Cut out text with offset to create border
-            text_lines(text_border_width);
+            text_lines(text_border_width,text_extrusion);
         }
-        
-        // Add back the text without offset (creating the border effect)
-        text_lines(0);
-    }
+
+    // }
 }
 
 module textplate_with_stand(){
+    union(){
+
 
     difference(){
 
@@ -182,16 +182,17 @@ module textplate_with_stand(){
   
                 difference(){
 
-                translate([0,0,-thickness_stand])
+                    translate([0,0,-thickness_stand])
                     rotate([angle, 0, 0])
-                    difference(){
-                        translate([0, height/2,-thickness_stand/2])
-                        textplate();
-                        
-                    }
+                    translate([0, height/2,-thickness_stand/2])
+                    textplate();
                     translate([0,0,-thickness])
+                    color([0,0,0])
                     cuboid([width*2, height*2, 4]);
+                    
                 }
+
+                color([0,0,0])
                 translate([0, height2/2-thickness_stand/2, -thickness_stand/2])
                 cuboid([width, height2, thickness_stand], rounding=thickness_stand/4);
             
@@ -201,9 +202,18 @@ module textplate_with_stand(){
         }
         rotate([angle, 0, 0])
         translate([0,0,thickness/2])
+        color([0,0,0])
         cuboid([width*2, height*2, thickness]);
 
 
+    }
+
+        color([1,1,1])
+        translate([0,0,-thickness_stand])
+        rotate([angle, 0, 0])
+        translate([0, height/2,-thickness_stand/2])
+        // Add back the text without offset (creating the border effect)
+        text_lines(0, thickness_text = text_extrusion);
     }
 
 }
